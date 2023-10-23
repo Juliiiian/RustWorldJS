@@ -88,7 +88,7 @@ class Color {
 }
 
 /**
- * @typedef {Object} MapConfigObj
+ * @typedef {Object} MapConfigType
  * @property {Color} StartColor
  * @property {Color} WaterColor
  * @property {Color} GravelColor
@@ -102,20 +102,48 @@ class Color {
  * @property {Color} OffShoreColor
  * @property {Color} SunDirection
  * @property {Color} Half
- * @property {Color} [WaterOffset]
  * @property {number} SunPower
  * @property {number} Brightness
  * @property {number} Contrast
  * @property {number} OceanWaterLevel
+ * @property {number} [WaterOffset]
  */
 
 export class MapConfig {
-	/** @type {MapConfigObj} */
-	MapConfigObj;
+	/** @type {MapConfigType} */
+	MapConfig;
 
-	/** @type {MapConfigObj} */
+	/**
+	 * @param {MapConfigType} config
+	 */
 	constructor(config) {
-		this.MapConfigObj = config;
+		this.MapConfig = MapConfig.checkAndUseDefault(config);
+	}
+
+	/**
+	 * @param {MapConfigType} config
+	 */
+	static checkAndUseDefault(config) {
+		config.StartColor = config.StartColor instanceof Color ? config.StartColor : currentMapConfig.MapConfig.StartColor;
+		config.WaterColor = config.WaterColor instanceof Color ? config.WaterColor : currentMapConfig.MapConfig.WaterColor;
+		config.GravelColor = config.GravelColor instanceof Color ? config.GravelColor : currentMapConfig.MapConfig.GravelColor;
+		config.DirtColor = config.DirtColor instanceof Color ? config.DirtColor : currentMapConfig.MapConfig.DirtColor;
+		config.SandColor = config.SandColor instanceof Color ? config.SandColor : currentMapConfig.MapConfig.SandColor;
+		config.GrassColor = config.GrassColor instanceof Color ? config.GrassColor : currentMapConfig.MapConfig.GrassColor;
+		config.ForestColor = config.ForestColor instanceof Color ? config.ForestColor : currentMapConfig.MapConfig.ForestColor;
+		config.RockColor = config.RockColor instanceof Color ? config.RockColor : currentMapConfig.MapConfig.RockColor;
+		config.SnowColor = config.SnowColor instanceof Color ? config.SnowColor : currentMapConfig.MapConfig.SnowColor;
+		config.PebbleColor = config.PebbleColor instanceof Color ? config.PebbleColor : currentMapConfig.MapConfig.PebbleColor;
+		config.OffShoreColor = config.OffShoreColor instanceof Color ? config.OffShoreColor : currentMapConfig.MapConfig.OffShoreColor;
+		config.SunDirection = config.SunDirection instanceof Color ? config.SunDirection : currentMapConfig.MapConfig.SunDirection;
+		config.Half = config.Half instanceof Color ? config.Half : currentMapConfig.MapConfig.Half;
+
+		config.SunPower = typeof config.SunPower === 'number' ? config.SunPower : currentMapConfig.MapConfig.SunPower;
+		config.Brightness = typeof config.Brightness === 'number' ? config.Brightness : currentMapConfig.MapConfig.Brightness;
+		config.Contrast = typeof config.Contrast === 'number' ? config.Contrast : currentMapConfig.MapConfig.Contrast;
+		config.OceanWaterLevel = typeof config.OceanWaterLevel === 'number' ? config.OceanWaterLevel : currentMapConfig.MapConfig.OceanWaterLevel;
+		config.WaterOffset = typeof config.WaterOffset === 'number' ? config.WaterOffset : 0;
+		return config;
 	}
 }
 
