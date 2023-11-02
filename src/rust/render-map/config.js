@@ -2,7 +2,7 @@
  * Used Vector3 from unity and modified it
  * https://github.com/Unity-Technologies/UnityCsReference/blob/master/Runtime/Export/Math/Vector3.cs
  */
-export class Color {
+export class Vector {
 	/** @type {number} */
 	r;
 	/** @type {number} */
@@ -33,22 +33,22 @@ export class Color {
 	}
 
 	/**
-	 * @param {Color} color
+	 * @param {Vector} vector
 	 */
-	static log(color) {
-		console.log(`Color: ${color.r}, ${color.g}, ${color.b}, ${color.a}`);
+	static log(vector) {
+		console.log(`Vector: ${vector.r}, ${vector.g}, ${vector.b}, ${vector.a}`);
 	}
 
 	/**
-	 * @param {Color} start
-	 * @param {Color} end
+	 * @param {Vector} start
+	 * @param {Vector} end
 	 * @param {number} t
-	 * @returns {Color}
+	 * @returns {Vector}
 	 */
 	static Lerp(start, end, t) {
 		//clamping between 0 - 1
 		t = Math.max(0, Math.min(t, 1));
-		return new Color(
+		return new Vector(
 			start.r + (end.r - start.r) * t, // r
 			start.g + (end.g - start.g) * t, // g
 			start.b + (end.b - start.b) * t // b
@@ -56,11 +56,20 @@ export class Color {
 	}
 
 	/**
-	 * @param {Color} color
+	 * @param {Vector} vector
 	 * @returns {number}
 	 */
-	static Magnitude(color) {
-		return Math.sqrt(color.r * color.r + color.g * color.g + color.b * color.b);
+	static Magnitude(vector) {
+		return Math.sqrt(vector.r * vector.r + vector.g * vector.g + vector.b * vector.b);
+	}
+
+	/**
+	 * @param {Vector} lhs
+	 * @param {Vector} rhs
+	 * @returns {number}
+	 */
+	static Dot(lhs, rhs) {
+		return lhs.r * rhs.r + lhs.g * rhs.g + lhs.b * rhs.b;
 	}
 
 	/**
@@ -74,23 +83,23 @@ export class Color {
 
 	/**
 	 *
-	 * @param {Color} color
+	 * @param {Vector} vector
 	 */
-	Addition(color) {
-		this.r + color.r;
-		this.g + color.g;
-		this.b + color.b;
+	Addition(vector) {
+		this.r + vector.r;
+		this.g + vector.g;
+		this.b + vector.b;
 		return this;
 	}
 
 	/**
 	 *
-	 * @param {Color} color
+	 * @param {Vector} vector
 	 */
-	Substraction(color) {
-		this.r - color.r;
-		this.g - color.g;
-		this.b - color.b;
+	Substraction(vector) {
+		this.r - vector.r;
+		this.g - vector.g;
+		this.b - vector.b;
 		return this;
 	}
 
@@ -115,18 +124,18 @@ export class Color {
 	}
 
 	/**
-	 * @param {Color} color
+	 * @param {Vector} vector
 	 * @returns
 	 */
-	static Normalize(color) {
+	static Normalize(vector) {
 		/** @type {number} */
-		let mag = Color.Magnitude(color);
+		let mag = Vector.Magnitude(vector);
 		if (mag > Number.EPSILON) {
-			color.Divide(mag);
+			vector.Divide(mag);
 		} else {
-			color.setZero();
+			vector.setZero();
 		}
-		return color;
+		return vector;
 	}
 
 	/**
@@ -134,7 +143,7 @@ export class Color {
 	 */
 	Normalize() {
 		/** @type {number} */
-		let mag = Color.Magnitude(this);
+		let mag = Vector.Magnitude(this);
 		if (mag > Number.EPSILON) {
 			this.Divide(mag);
 		} else {
@@ -145,19 +154,19 @@ export class Color {
 
 /**
  * @typedef {Object} MapConfigType
- * @property {Color} StartColor
- * @property {Color} WaterColor
- * @property {Color} GravelColor
- * @property {Color} DirtColor
- * @property {Color} SandColor
- * @property {Color} GrassColor
- * @property {Color} ForestColor
- * @property {Color} RockColor
- * @property {Color} SnowColor
- * @property {Color} PebbleColor
- * @property {Color} OffShoreColor
- * @property {Color} SunDirection
- * @property {Color} Half
+ * @property {Vector} StartColor
+ * @property {Vector} WaterColor
+ * @property {Vector} GravelColor
+ * @property {Vector} DirtColor
+ * @property {Vector} SandColor
+ * @property {Vector} GrassColor
+ * @property {Vector} ForestColor
+ * @property {Vector} RockColor
+ * @property {Vector} SnowColor
+ * @property {Vector} PebbleColor
+ * @property {Vector} OffShoreColor
+ * @property {Vector} SunDirection
+ * @property {Vector} Half
  * @property {number} SunPower
  * @property {number} Brightness
  * @property {number} Contrast
@@ -166,31 +175,31 @@ export class Color {
  */
 
 export class MapConfig {
-	/** @type {Color} */
+	/** @type {Vector} */
 	StartColor;
-	/** @type {Color} */
+	/** @type {Vector} */
 	WaterColor;
-	/** @type {Color} */
+	/** @type {Vector} */
 	GravelColor;
-	/** @type {Color} */
+	/** @type {Vector} */
 	DirtColor;
-	/** @type {Color} */
+	/** @type {Vector} */
 	SandColor;
-	/** @type {Color} */
+	/** @type {Vector} */
 	GrassColor;
-	/** @type {Color} */
+	/** @type {Vector} */
 	ForestColor;
-	/** @type {Color} */
+	/** @type {Vector} */
 	RockColor;
-	/** @type {Color} */
+	/** @type {Vector} */
 	SnowColor;
-	/** @type {Color} */
+	/** @type {Vector} */
 	PebbleColor;
-	/** @type {Color} */
+	/** @type {Vector} */
 	OffShoreColor;
-	/** @type {Color} */
+	/** @type {Vector} */
 	SunDirection;
-	/** @type {Color} */
+	/** @type {Vector} */
 	Half;
 	/** @type {number} */
 	SunPower;
@@ -207,19 +216,19 @@ export class MapConfig {
 	 * @param {MapConfigType} config
 	 */
 	constructor(config) {
-		this.StartColor = config.StartColor instanceof Color ? config.StartColor : currentMapConfig.StartColor;
-		this.WaterColor = config.WaterColor instanceof Color ? config.WaterColor : currentMapConfig.WaterColor;
-		this.GravelColor = config.GravelColor instanceof Color ? config.GravelColor : currentMapConfig.GravelColor;
-		this.DirtColor = config.DirtColor instanceof Color ? config.DirtColor : currentMapConfig.DirtColor;
-		this.SandColor = config.SandColor instanceof Color ? config.SandColor : currentMapConfig.SandColor;
-		this.GrassColor = config.GrassColor instanceof Color ? config.GrassColor : currentMapConfig.GrassColor;
-		this.ForestColor = config.ForestColor instanceof Color ? config.ForestColor : currentMapConfig.ForestColor;
-		this.RockColor = config.RockColor instanceof Color ? config.RockColor : currentMapConfig.RockColor;
-		this.SnowColor = config.SnowColor instanceof Color ? config.SnowColor : currentMapConfig.SnowColor;
-		this.PebbleColor = config.PebbleColor instanceof Color ? config.PebbleColor : currentMapConfig.PebbleColor;
-		this.OffShoreColor = config.OffShoreColor instanceof Color ? config.OffShoreColor : currentMapConfig.OffShoreColor;
-		this.SunDirection = config.SunDirection instanceof Color ? config.SunDirection : currentMapConfig.SunDirection;
-		this.Half = config.Half instanceof Color ? config.Half : currentMapConfig.Half;
+		this.StartColor = config.StartColor instanceof Vector ? config.StartColor : currentMapConfig.StartColor;
+		this.WaterColor = config.WaterColor instanceof Vector ? config.WaterColor : currentMapConfig.WaterColor;
+		this.GravelColor = config.GravelColor instanceof Vector ? config.GravelColor : currentMapConfig.GravelColor;
+		this.DirtColor = config.DirtColor instanceof Vector ? config.DirtColor : currentMapConfig.DirtColor;
+		this.SandColor = config.SandColor instanceof Vector ? config.SandColor : currentMapConfig.SandColor;
+		this.GrassColor = config.GrassColor instanceof Vector ? config.GrassColor : currentMapConfig.GrassColor;
+		this.ForestColor = config.ForestColor instanceof Vector ? config.ForestColor : currentMapConfig.ForestColor;
+		this.RockColor = config.RockColor instanceof Vector ? config.RockColor : currentMapConfig.RockColor;
+		this.SnowColor = config.SnowColor instanceof Vector ? config.SnowColor : currentMapConfig.SnowColor;
+		this.PebbleColor = config.PebbleColor instanceof Vector ? config.PebbleColor : currentMapConfig.PebbleColor;
+		this.OffShoreColor = config.OffShoreColor instanceof Vector ? config.OffShoreColor : currentMapConfig.OffShoreColor;
+		this.SunDirection = config.SunDirection instanceof Vector ? config.SunDirection : currentMapConfig.SunDirection;
+		this.Half = config.Half instanceof Vector ? config.Half : currentMapConfig.Half;
 
 		this.SunPower = typeof config.SunPower === 'number' ? config.SunPower : currentMapConfig.SunPower;
 		this.Brightness = typeof config.Brightness === 'number' ? config.Brightness : currentMapConfig.Brightness;
@@ -230,19 +239,19 @@ export class MapConfig {
 }
 
 export const oldMapConfig = new MapConfig({
-	StartColor: new Color(0.324313372, 0.397058845, 0.195609868),
-	WaterColor: new Color(0.269668937, 0.4205476, 0.5660378, 1),
-	GravelColor: new Color(0.139705867, 0.132621378, 0.114024632, 0.372),
-	DirtColor: new Color(0.322227329, 0.375, 0.228860289, 1),
-	SandColor: new Color(1, 0.8250507, 0.448529422, 1),
-	GrassColor: new Color(0.4509804, 0.5529412, 0.270588249, 1),
-	ForestColor: new Color(0.5529412, 0.440000027, 0.270588249, 1),
-	RockColor: new Color(0.42344287, 0.4852941, 0.314013839, 1),
-	SnowColor: new Color(0.8088235, 0.8088235, 0.8088235, 1),
-	PebbleColor: new Color(0.121568628, 0.419607848, 0.627451, 1),
-	OffShoreColor: new Color(0.166295841, 0.259337664, 0.3490566, 1),
-	SunDirection: Color.Normalize(new Color(0.95, 2.87, 2.37)),
-	Half: new Color(0.5, 0.5, 0.5),
+	StartColor: new Vector(0.324313372, 0.397058845, 0.195609868),
+	WaterColor: new Vector(0.269668937, 0.4205476, 0.5660378, 1),
+	GravelColor: new Vector(0.139705867, 0.132621378, 0.114024632, 0.372),
+	DirtColor: new Vector(0.322227329, 0.375, 0.228860289, 1),
+	SandColor: new Vector(1, 0.8250507, 0.448529422, 1),
+	GrassColor: new Vector(0.4509804, 0.5529412, 0.270588249, 1),
+	ForestColor: new Vector(0.5529412, 0.440000027, 0.270588249, 1),
+	RockColor: new Vector(0.42344287, 0.4852941, 0.314013839, 1),
+	SnowColor: new Vector(0.8088235, 0.8088235, 0.8088235, 1),
+	PebbleColor: new Vector(0.121568628, 0.419607848, 0.627451, 1),
+	OffShoreColor: new Vector(0.166295841, 0.259337664, 0.3490566, 1),
+	SunDirection: Vector.Normalize(new Vector(0.95, 2.87, 2.37)),
+	Half: new Vector(0.5, 0.5, 0.5),
 	SunPower: 0.5,
 	Brightness: 1,
 	Contrast: 0.87,
@@ -251,19 +260,19 @@ export const oldMapConfig = new MapConfig({
 });
 
 export const currentMapConfig = new MapConfig({
-	StartColor: new Color(0.286274523, 0.270588249, 0.247058839),
-	WaterColor: new Color(0.16941601, 0.317557573, 0.362000018, 1),
-	GravelColor: new Color(0.25, 0.243421048, 0.220394745, 1),
-	DirtColor: new Color(0.6, 0.479594618, 0.33, 1),
-	SandColor: new Color(0.7, 0.65968585, 0.5277487, 1),
-	GrassColor: new Color(0.354863644, 0.37, 0.2035, 1),
-	ForestColor: new Color(0.248437509, 0.3, 0.0703125, 1),
-	RockColor: new Color(0.4, 0.393798441, 0.375193775, 1),
-	SnowColor: new Color(0.862745166, 0.9294118, 0.941176534, 1),
-	PebbleColor: new Color(0.137254909, 0.2784314, 0.2761563, 1),
-	OffShoreColor: new Color(0.04090196, 0.220600322, 0.274509817, 1),
-	SunDirection: Color.Normalize(new Color(0.95, 2.87, 2.37)),
-	Half: new Color(0.5, 0.5, 0.5),
+	StartColor: new Vector(0.286274523, 0.270588249, 0.247058839),
+	WaterColor: new Vector(0.16941601, 0.317557573, 0.362000018, 1),
+	GravelColor: new Vector(0.25, 0.243421048, 0.220394745, 1),
+	DirtColor: new Vector(0.6, 0.479594618, 0.33, 1),
+	SandColor: new Vector(0.7, 0.65968585, 0.5277487, 1),
+	GrassColor: new Vector(0.354863644, 0.37, 0.2035, 1),
+	ForestColor: new Vector(0.248437509, 0.3, 0.0703125, 1),
+	RockColor: new Vector(0.4, 0.393798441, 0.375193775, 1),
+	SnowColor: new Vector(0.862745166, 0.9294118, 0.941176534, 1),
+	PebbleColor: new Vector(0.137254909, 0.2784314, 0.2761563, 1),
+	OffShoreColor: new Vector(0.04090196, 0.220600322, 0.274509817, 1),
+	SunDirection: Vector.Normalize(new Vector(0.95, 2.87, 2.37)),
+	Half: new Vector(0.5, 0.5, 0.5),
 	SunPower: 0.65,
 	Brightness: 1.05,
 	Contrast: 0.94,

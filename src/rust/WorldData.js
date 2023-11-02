@@ -3,7 +3,7 @@ import { createCanvas } from 'canvas';
 
 import TerrainMap from './TerrainMap.js';
 import TextMap from './TextMap.js';
-import { Color, currentMapConfig, MapConfig } from './render-map/config.js';
+import { Vector, currentMapConfig, MapConfig } from './render-map/config.js';
 
 const TERRAIN_MAPS = {
 	terrain: {
@@ -360,22 +360,22 @@ export class WorldData {
 
 				let terrainHeight = heightMap.get(x, y);
 
-				//let sun = Math.Max(Vector3.Dot(GetNormal(offsetRow, offsetCol), config.SunDirection), 0);
+				let sun = Math.max(Vector.Dot(heightMap.getNormal(x, y), config.SunDirection), 0);
 
-				let pixel = Color.Lerp(config.StartColor, config.GravelColor, splatMap.getNormalized(x, y, 7) * config.GravelColor.a);
-				pixel = Color.Lerp(pixel, config.PebbleColor, splatMap.getNormalized(x, y, 6) * config.PebbleColor.a);
-				pixel = Color.Lerp(pixel, config.RockColor, splatMap.getNormalized(x, y, 3) * config.RockColor.a);
-				pixel = Color.Lerp(pixel, config.DirtColor, splatMap.getNormalized(x, y, 0) * config.DirtColor.a);
-				pixel = Color.Lerp(pixel, config.GrassColor, splatMap.getNormalized(x, y, 4) * config.GrassColor.a);
-				pixel = Color.Lerp(pixel, config.ForestColor, splatMap.getNormalized(x, y, 5) * config.ForestColor.a);
-				pixel = Color.Lerp(pixel, config.SandColor, splatMap.getNormalized(x, y, 2) * config.SandColor.a);
-				pixel = Color.Lerp(pixel, config.SnowColor, splatMap.getNormalized(x, y, 1) * config.SnowColor.a);
+				let pixel = Vector.Lerp(config.StartColor, config.GravelColor, splatMap.getNormalized(x, y, 7) * config.GravelColor.a);
+				pixel = Vector.Lerp(pixel, config.PebbleColor, splatMap.getNormalized(x, y, 6) * config.PebbleColor.a);
+				pixel = Vector.Lerp(pixel, config.RockColor, splatMap.getNormalized(x, y, 3) * config.RockColor.a);
+				pixel = Vector.Lerp(pixel, config.DirtColor, splatMap.getNormalized(x, y, 0) * config.DirtColor.a);
+				pixel = Vector.Lerp(pixel, config.GrassColor, splatMap.getNormalized(x, y, 4) * config.GrassColor.a);
+				pixel = Vector.Lerp(pixel, config.ForestColor, splatMap.getNormalized(x, y, 5) * config.ForestColor.a);
+				pixel = Vector.Lerp(pixel, config.SandColor, splatMap.getNormalized(x, y, 2) * config.SandColor.a);
+				pixel = Vector.Lerp(pixel, config.SnowColor, splatMap.getNormalized(x, y, 1) * config.SnowColor.a);
 
 				if (terrainHeight < config.OceanWaterLevel) {
 					let waterDepth = config.OceanWaterLevel - terrainHeight;
-					pixel = Color.Lerp(pixel, config.WaterColor, Math.max(0, Math.min(0.5 + waterDepth / 5.0, 1)));
-					pixel = Color.Lerp(pixel, config.OffShoreColor, Math.max(0, Math.min(waterDepth / 50, 1)));
-					//sun = config.SunPower;
+					pixel = Vector.Lerp(pixel, config.WaterColor, Math.max(0, Math.min(0.5 + waterDepth / 5.0, 1)));
+					pixel = Vector.Lerp(pixel, config.OffShoreColor, Math.max(0, Math.min(waterDepth / 50, 1)));
+					sun = config.SunPower;
 				}
 
 				//sun
