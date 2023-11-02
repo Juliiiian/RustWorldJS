@@ -362,14 +362,14 @@ export class WorldData {
 
 				let sun = Math.max(Vector.Dot(heightMap.getNormal(x, y), config.SunDirection), 0);
 
-				let pixel = Vector.Lerp(config.StartColor, config.GravelColor, splatMap.getNormalized(x, y, 7) * config.GravelColor.a);
-				pixel = Vector.Lerp(pixel, config.PebbleColor, splatMap.getNormalized(x, y, 6) * config.PebbleColor.a);
-				pixel = Vector.Lerp(pixel, config.RockColor, splatMap.getNormalized(x, y, 3) * config.RockColor.a);
-				pixel = Vector.Lerp(pixel, config.DirtColor, splatMap.getNormalized(x, y, 0) * config.DirtColor.a);
-				pixel = Vector.Lerp(pixel, config.GrassColor, splatMap.getNormalized(x, y, 4) * config.GrassColor.a);
-				pixel = Vector.Lerp(pixel, config.ForestColor, splatMap.getNormalized(x, y, 5) * config.ForestColor.a);
-				pixel = Vector.Lerp(pixel, config.SandColor, splatMap.getNormalized(x, y, 2) * config.SandColor.a);
-				pixel = Vector.Lerp(pixel, config.SnowColor, splatMap.getNormalized(x, y, 1) * config.SnowColor.a);
+				let pixel = Vector.Lerp(config.StartColor, config.GravelColor, splatMap.getNormalized(x, y, 7) * config.GravelColor.m);
+				pixel = Vector.Lerp(pixel, config.PebbleColor, splatMap.getNormalized(x, y, 6) * config.PebbleColor.m);
+				pixel = Vector.Lerp(pixel, config.RockColor, splatMap.getNormalized(x, y, 3) * config.RockColor.m);
+				pixel = Vector.Lerp(pixel, config.DirtColor, splatMap.getNormalized(x, y, 0) * config.DirtColor.m);
+				pixel = Vector.Lerp(pixel, config.GrassColor, splatMap.getNormalized(x, y, 4) * config.GrassColor.m);
+				pixel = Vector.Lerp(pixel, config.ForestColor, splatMap.getNormalized(x, y, 5) * config.ForestColor.m);
+				pixel = Vector.Lerp(pixel, config.SandColor, splatMap.getNormalized(x, y, 2) * config.SandColor.m);
+				pixel = Vector.Lerp(pixel, config.SnowColor, splatMap.getNormalized(x, y, 1) * config.SnowColor.m);
 
 				if (terrainHeight < config.OceanWaterLevel) {
 					let waterDepth = config.OceanWaterLevel - terrainHeight;
@@ -379,15 +379,14 @@ export class WorldData {
 				}
 
 				//sun
-				// pixel = pixel.Addition(pixel.Multiply((sun - config.SunPower) * config.SunPower));
+				pixel = Vector.Addition(pixel, Vector.Multiply(pixel, (sun - config.SunPower) * config.SunPower));
 
-				//
-				// pixel = config.Half.Addition(pixel.Substraction(config.Half).Multiply(config.Contrast));
+				//contrast ig?
+				pixel = Vector.Addition(Vector.Multiply(Vector.Substraction(pixel, config.Half), config.Contrast), config.Half);
+				//Brightness
+				pixel = Vector.Multiply(pixel, config.Brightness);
 
-				pixel = pixel.Multiply(config.Brightness);
-
-				// console.log(Color.log(pixel));
-				setImageData(imageData, i, pixel.r * 255, pixel.g * 255, pixel.b * 255, pixel.a);
+				setImageData(imageData, i, pixel.x * 255, pixel.y * 255, pixel.z * 255, pixel.m);
 			}
 		}
 

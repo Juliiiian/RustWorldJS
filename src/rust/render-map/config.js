@@ -4,13 +4,13 @@
  */
 export class Vector {
 	/** @type {number} */
-	r;
+	x;
 	/** @type {number} */
-	g;
+	y;
 	/** @type {number} */
-	b;
+	z;
 	/** @type {number} */
-	a;
+	m;
 
 	/**
 	 * @param {number} r
@@ -19,16 +19,16 @@ export class Vector {
 	 * @param {number} [a]
 	 */
 	constructor(r, g, b, a) {
-		this.r = r;
-		this.g = g;
-		this.b = b;
+		this.x = r;
+		this.y = g;
+		this.z = b;
 
 		// when alpha value is defined
 		if (a) {
-			this.a = a;
+			this.m = a;
 		} else {
 			//set to one for no alpha val
-			this.a = 1;
+			this.m = 1;
 		}
 	}
 
@@ -36,7 +36,7 @@ export class Vector {
 	 * @param {Vector} vector
 	 */
 	static log(vector) {
-		console.log(`Vector: ${vector.r}, ${vector.g}, ${vector.b}, ${vector.a}`);
+		console.log(`Vector: ${vector.x}, ${vector.y}, ${vector.z}, ${vector.m}`);
 	}
 
 	/**
@@ -49,9 +49,9 @@ export class Vector {
 		//clamping between 0 - 1
 		t = Math.max(0, Math.min(t, 1));
 		return new Vector(
-			start.r + (end.r - start.r) * t, // r
-			start.g + (end.g - start.g) * t, // g
-			start.b + (end.b - start.b) * t // b
+			start.x + (end.x - start.x) * t, // r
+			start.y + (end.y - start.y) * t, // g
+			start.z + (end.z - start.z) * t // b
 		);
 	}
 
@@ -60,7 +60,7 @@ export class Vector {
 	 * @returns {number}
 	 */
 	static Magnitude(vector) {
-		return Math.sqrt(vector.r * vector.r + vector.g * vector.g + vector.b * vector.b);
+		return Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
 	}
 
 	/**
@@ -69,58 +69,63 @@ export class Vector {
 	 * @returns {number}
 	 */
 	static Dot(lhs, rhs) {
-		return lhs.r * rhs.r + lhs.g * rhs.g + lhs.b * rhs.b;
+		return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+	}
+
+	/**
+	 * @param {Vector} lhs
+	 * @param {Vector} rhs
+	 * @returns {Vector}
+	 */
+	static Cross(lhs, rhs) {
+		return new Vector(
+			lhs.y * rhs.z - lhs.z * rhs.y, //
+			lhs.z * rhs.x - lhs.x * rhs.z, //
+			lhs.x * rhs.y - lhs.y * rhs.x
+		);
 	}
 
 	/**
 	 * set the vector to zero
 	 */
 	setZero() {
-		this.r = 0;
-		this.g = 0;
-		this.b = 0;
+		this.x = 0;
+		this.y = 0;
+		this.z = 0;
 	}
 
 	/**
 	 *
-	 * @param {Vector} vector
+	 * @param {Vector} lhs
+	 * @param {Vector} rhs
 	 */
-	Addition(vector) {
-		this.r + vector.r;
-		this.g + vector.g;
-		this.b + vector.b;
-		return this;
+	static Addition(lhs, rhs) {
+		return new Vector(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
 	}
 
 	/**
 	 *
-	 * @param {Vector} vector
+	 * @param {Vector} lhs
+	 * @param {Vector} rhs
 	 */
-	Substraction(vector) {
-		this.r - vector.r;
-		this.g - vector.g;
-		this.b - vector.b;
-		return this;
+	static Substraction(lhs, rhs) {
+		return new Vector(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
 	}
 
 	/**
-	 *
+	 * @param {Vector} vector
 	 * @param {number} d
 	 */
-	Multiply(d) {
-		this.r * d;
-		this.g * d;
-		this.b * d;
-		return this;
+	static Multiply(vector, d) {
+		return new Vector(vector.x * d, vector.y * d, vector.z * d);
 	}
 
 	/**
+	 * @param {Vector} vector
 	 * @param {number} divider
 	 */
-	Divide(divider) {
-		this.r = this.r / divider;
-		this.g = this.g / divider;
-		this.b = this.b / divider;
+	static Divide(vector, divider) {
+		return new Vector(vector.x / divider, vector.y / divider, vector.z / divider);
 	}
 
 	/**
@@ -131,24 +136,11 @@ export class Vector {
 		/** @type {number} */
 		let mag = Vector.Magnitude(vector);
 		if (mag > Number.EPSILON) {
-			vector.Divide(mag);
+			vector = Vector.Divide(vector, mag);
 		} else {
 			vector.setZero();
 		}
 		return vector;
-	}
-
-	/**
-	 * @returns
-	 */
-	Normalize() {
-		/** @type {number} */
-		let mag = Vector.Magnitude(this);
-		if (mag > Number.EPSILON) {
-			this.Divide(mag);
-		} else {
-			this.setZero();
-		}
 	}
 }
 

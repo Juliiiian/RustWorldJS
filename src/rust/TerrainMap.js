@@ -1,3 +1,5 @@
+import { Vector } from './render-map/config.js';
+
 export default class TerrainMap {
 	/** @type {"int" | "short" | "byte"} */
 	type;
@@ -106,6 +108,19 @@ export default class TerrainMap {
 	 */
 	set(value, x = 0, y = 0, channel = 0) {
 		this.data[channel][x * this.worldSize + y] = value;
+	}
+
+	/**
+	 *
+	 * @param {number} x
+	 * @param {number} y
+	 * @returns {Vector}
+	 */
+	getNormal(x = 0, y = 0, channel = 0) {
+		const vec1 = new Vector(1, 0, this.get(x, y, channel) - this.get(x + 1, y, channel));
+		const vec2 = new Vector(0, 1, this.get(x, y, channel) - this.get(x, y + 1, channel));
+		const normal = Vector.Normalize(Vector.Cross(vec1, vec2));
+		return normal;
 	}
 
 	getNormalized(x = 0, y = 0, channel = 0) {
