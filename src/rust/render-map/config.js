@@ -2,7 +2,7 @@
  * Used Vector3 from unity and modified it
  * https://github.com/Unity-Technologies/UnityCsReference/blob/master/Runtime/Export/Math/Vector3.cs
  */
-class Color {
+export class Color {
 	/** @type {number} */
 	r;
 	/** @type {number} */
@@ -34,6 +34,29 @@ class Color {
 
 	/**
 	 * @param {Color} color
+	 */
+	static log(color) {
+		console.log(`Color: ${color.r}, ${color.g}, ${color.b}, ${color.a}`);
+	}
+
+	/**
+	 * @param {Color} start
+	 * @param {Color} end
+	 * @param {number} t
+	 * @returns {Color}
+	 */
+	static Lerp(start, end, t) {
+		//clamping between 0 - 1
+		t = Math.max(0, Math.min(t, 1));
+		return new Color(
+			start.r + (end.r - start.r) * t, // r
+			start.g + (end.g - start.g) * t, // g
+			start.b + (end.b - start.b) * t // b
+		);
+	}
+
+	/**
+	 * @param {Color} color
 	 * @returns {number}
 	 */
 	static Magnitude(color) {
@@ -47,6 +70,39 @@ class Color {
 		this.r = 0;
 		this.g = 0;
 		this.b = 0;
+	}
+
+	/**
+	 *
+	 * @param {Color} color
+	 */
+	Addition(color) {
+		this.r + color.r;
+		this.g + color.g;
+		this.b + color.b;
+		return this;
+	}
+
+	/**
+	 *
+	 * @param {Color} color
+	 */
+	Substraction(color) {
+		this.r - color.r;
+		this.g - color.g;
+		this.b - color.b;
+		return this;
+	}
+
+	/**
+	 *
+	 * @param {number} d
+	 */
+	Multiply(d) {
+		this.r * d;
+		this.g * d;
+		this.b * d;
+		return this;
 	}
 
 	/**
@@ -110,40 +166,66 @@ class Color {
  */
 
 export class MapConfig {
-	/** @type {MapConfigType} */
-	MapConfig;
+	/** @type {Color} */
+	StartColor;
+	/** @type {Color} */
+	WaterColor;
+	/** @type {Color} */
+	GravelColor;
+	/** @type {Color} */
+	DirtColor;
+	/** @type {Color} */
+	SandColor;
+	/** @type {Color} */
+	GrassColor;
+	/** @type {Color} */
+	ForestColor;
+	/** @type {Color} */
+	RockColor;
+	/** @type {Color} */
+	SnowColor;
+	/** @type {Color} */
+	PebbleColor;
+	/** @type {Color} */
+	OffShoreColor;
+	/** @type {Color} */
+	SunDirection;
+	/** @type {Color} */
+	Half;
+	/** @type {number} */
+	SunPower;
+	/** @type {number} */
+	Brightness;
+	/** @type {number} */
+	Contrast;
+	/** @type {number} */
+	OceanWaterLevel;
+	/** @type {number} */
+	WaterOffset;
 
 	/**
 	 * @param {MapConfigType} config
 	 */
 	constructor(config) {
-		this.MapConfig = MapConfig.checkAndUseDefault(config);
-	}
+		this.StartColor = config.StartColor instanceof Color ? config.StartColor : currentMapConfig.StartColor;
+		this.WaterColor = config.WaterColor instanceof Color ? config.WaterColor : currentMapConfig.WaterColor;
+		this.GravelColor = config.GravelColor instanceof Color ? config.GravelColor : currentMapConfig.GravelColor;
+		this.DirtColor = config.DirtColor instanceof Color ? config.DirtColor : currentMapConfig.DirtColor;
+		this.SandColor = config.SandColor instanceof Color ? config.SandColor : currentMapConfig.SandColor;
+		this.GrassColor = config.GrassColor instanceof Color ? config.GrassColor : currentMapConfig.GrassColor;
+		this.ForestColor = config.ForestColor instanceof Color ? config.ForestColor : currentMapConfig.ForestColor;
+		this.RockColor = config.RockColor instanceof Color ? config.RockColor : currentMapConfig.RockColor;
+		this.SnowColor = config.SnowColor instanceof Color ? config.SnowColor : currentMapConfig.SnowColor;
+		this.PebbleColor = config.PebbleColor instanceof Color ? config.PebbleColor : currentMapConfig.PebbleColor;
+		this.OffShoreColor = config.OffShoreColor instanceof Color ? config.OffShoreColor : currentMapConfig.OffShoreColor;
+		this.SunDirection = config.SunDirection instanceof Color ? config.SunDirection : currentMapConfig.SunDirection;
+		this.Half = config.Half instanceof Color ? config.Half : currentMapConfig.Half;
 
-	/**
-	 * @param {MapConfigType} config
-	 */
-	static checkAndUseDefault(config) {
-		config.StartColor = config.StartColor instanceof Color ? config.StartColor : currentMapConfig.MapConfig.StartColor;
-		config.WaterColor = config.WaterColor instanceof Color ? config.WaterColor : currentMapConfig.MapConfig.WaterColor;
-		config.GravelColor = config.GravelColor instanceof Color ? config.GravelColor : currentMapConfig.MapConfig.GravelColor;
-		config.DirtColor = config.DirtColor instanceof Color ? config.DirtColor : currentMapConfig.MapConfig.DirtColor;
-		config.SandColor = config.SandColor instanceof Color ? config.SandColor : currentMapConfig.MapConfig.SandColor;
-		config.GrassColor = config.GrassColor instanceof Color ? config.GrassColor : currentMapConfig.MapConfig.GrassColor;
-		config.ForestColor = config.ForestColor instanceof Color ? config.ForestColor : currentMapConfig.MapConfig.ForestColor;
-		config.RockColor = config.RockColor instanceof Color ? config.RockColor : currentMapConfig.MapConfig.RockColor;
-		config.SnowColor = config.SnowColor instanceof Color ? config.SnowColor : currentMapConfig.MapConfig.SnowColor;
-		config.PebbleColor = config.PebbleColor instanceof Color ? config.PebbleColor : currentMapConfig.MapConfig.PebbleColor;
-		config.OffShoreColor = config.OffShoreColor instanceof Color ? config.OffShoreColor : currentMapConfig.MapConfig.OffShoreColor;
-		config.SunDirection = config.SunDirection instanceof Color ? config.SunDirection : currentMapConfig.MapConfig.SunDirection;
-		config.Half = config.Half instanceof Color ? config.Half : currentMapConfig.MapConfig.Half;
-
-		config.SunPower = typeof config.SunPower === 'number' ? config.SunPower : currentMapConfig.MapConfig.SunPower;
-		config.Brightness = typeof config.Brightness === 'number' ? config.Brightness : currentMapConfig.MapConfig.Brightness;
-		config.Contrast = typeof config.Contrast === 'number' ? config.Contrast : currentMapConfig.MapConfig.Contrast;
-		config.OceanWaterLevel = typeof config.OceanWaterLevel === 'number' ? config.OceanWaterLevel : currentMapConfig.MapConfig.OceanWaterLevel;
-		config.WaterOffset = typeof config.WaterOffset === 'number' ? config.WaterOffset : 0;
-		return config;
+		this.SunPower = typeof config.SunPower === 'number' ? config.SunPower : currentMapConfig.SunPower;
+		this.Brightness = typeof config.Brightness === 'number' ? config.Brightness : currentMapConfig.Brightness;
+		this.Contrast = typeof config.Contrast === 'number' ? config.Contrast : currentMapConfig.Contrast;
+		this.OceanWaterLevel = typeof config.OceanWaterLevel === 'number' ? config.OceanWaterLevel : currentMapConfig.OceanWaterLevel;
+		this.WaterOffset = typeof config.WaterOffset === 'number' ? config.WaterOffset : 0;
 	}
 }
 
@@ -165,6 +247,7 @@ export const oldMapConfig = new MapConfig({
 	Brightness: 1,
 	Contrast: 0.87,
 	OceanWaterLevel: 0,
+	WaterOffset: 0,
 });
 
 export const currentMapConfig = new MapConfig({
@@ -185,4 +268,5 @@ export const currentMapConfig = new MapConfig({
 	Brightness: 1.05,
 	Contrast: 0.94,
 	OceanWaterLevel: 0.0,
+	WaterOffset: 0,
 });
