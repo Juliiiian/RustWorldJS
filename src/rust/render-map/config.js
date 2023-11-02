@@ -246,7 +246,7 @@ export const oldMapConfig = new MapConfig({
 	SunPower: 0.5,
 	Brightness: 1,
 	Contrast: 0.87,
-	OceanWaterLevel: 0,
+	OceanWaterLevel: 16390,
 	WaterOffset: 0,
 });
 
@@ -267,6 +267,6 @@ export const currentMapConfig = new MapConfig({
 	SunPower: 0.65,
 	Brightness: 1.05,
 	Contrast: 0.94,
-	OceanWaterLevel: 0.0,
+	OceanWaterLevel: 16390,
 	WaterOffset: 0,
 });

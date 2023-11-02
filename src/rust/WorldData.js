@@ -358,7 +358,7 @@ export class WorldData {
 			for (let y = 0; y < this.size; y++) {
 				let i = (x * this.size + y) * 4;
 
-				let terrainHeight = heightMap.getNormalized(x, y);
+				let terrainHeight = heightMap.get(x, y);
 
 				//let sun = Math.Max(Vector3.Dot(GetNormal(offsetRow, offsetCol), config.SunDirection), 0);
 
@@ -371,15 +371,17 @@ export class WorldData {
 				pixel = Color.Lerp(pixel, config.SandColor, splatMap.getNormalized(x, y, 2) * config.SandColor.a);
 				pixel = Color.Lerp(pixel, config.SnowColor, splatMap.getNormalized(x, y, 1) * config.SnowColor.a);
 
-				let waterDepth = -terrainHeight;
-				if (terrainHeight > config.OceanWaterLevel) {
+				if (terrainHeight < config.OceanWaterLevel) {
+					let waterDepth = config.OceanWaterLevel - terrainHeight;
 					pixel = Color.Lerp(pixel, config.WaterColor, Math.max(0, Math.min(0.5 + waterDepth / 5.0, 1)));
 					pixel = Color.Lerp(pixel, config.OffShoreColor, Math.max(0, Math.min(waterDepth / 50, 1)));
 					//sun = config.SunPower;
 				}
 
-				//no idea rn
+				//sun
 				// pixel = pixel.Addition(pixel.Multiply((sun - config.SunPower) * config.SunPower));
+
+				//
 				// pixel = config.Half.Addition(pixel.Substraction(config.Half).Multiply(config.Contrast));
 
 				pixel = pixel.Multiply(config.Brightness);
