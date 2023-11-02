@@ -372,7 +372,7 @@ export class WorldData {
 				pixel = Color.Lerp(pixel, config.SnowColor, splatMap.getNormalized(x, y, 1) * config.SnowColor.a);
 
 				let waterDepth = -terrainHeight;
-				if (terrainHeight < 0.2494) {
+				if (terrainHeight > config.OceanWaterLevel) {
 					pixel = Color.Lerp(pixel, config.WaterColor, Math.max(0, Math.min(0.5 + waterDepth / 5.0, 1)));
 					pixel = Color.Lerp(pixel, config.OffShoreColor, Math.max(0, Math.min(waterDepth / 50, 1)));
 					//sun = config.SunPower;
