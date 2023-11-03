@@ -3,7 +3,7 @@ import { createCanvas } from 'canvas';
 
 import TerrainMap from './TerrainMap.js';
 import TextMap from './TextMap.js';
-import { Vector, currentMapConfig, MapConfig } from './render-map/config.js';
+import { Vector, currentMapConfig, MapConfig } from './map-config.js';
 
 const TERRAIN_MAPS = {
 	terrain: {

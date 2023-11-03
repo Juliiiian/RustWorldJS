@@ -1,4 +1,4 @@
-import { Vector } from './render-map/config.js';
+import { Vector } from './map-config.js';
 
 export default class TerrainMap {
 	/** @type {"int" | "short" | "byte"} */
