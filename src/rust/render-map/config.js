@@ -227,6 +227,8 @@ export class MapConfig {
 		this.Contrast = typeof config.Contrast === 'number' ? config.Contrast : currentMapConfig.Contrast;
 		this.OceanWaterLevel = typeof config.OceanWaterLevel === 'number' ? config.OceanWaterLevel : currentMapConfig.OceanWaterLevel;
 		this.WaterOffset = typeof config.WaterOffset === 'number' ? config.WaterOffset : 0;
+
+		this.SunPower /= 2; //to less sun
 	}
 }
 
