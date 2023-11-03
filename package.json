@@ -16,6 +16,7 @@
     "test": "./test"
   },
   "dependencies": {
+    "canvas": "^2.11.2",
     "protobufjs": "^7.1.1",
     "web-worker": "^1.2.0"
   },
