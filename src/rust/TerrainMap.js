@@ -1,4 +1,4 @@
-import { Vector } from './map-config.js';
+import { Vector } from './MapConfig.js';
 
 export default class TerrainMap {
 	/** @type {"int" | "short" | "byte"} */
