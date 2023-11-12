@@ -19,13 +19,10 @@ let TerrainMap;
 
 let importPromise = [
 	import('./TerrainMap.js').then((x) => {
-		//@ts-ignore
 		TerrainMap = x.default;
 	}),
 	import('./MapConfig.js').then((x) => {
-		//@ts-ignore
 		Vector = x.Vector;
-		//@ts-ignore
 		MapConfig = x.MapConfig;
 	}),
 ];
@@ -58,8 +55,8 @@ const render_chunk = (heightMap, splatMap, config, chunkInfo) => {
 	const imgData = new Uint8ClampedArray(new ArrayBuffer(Uint8ClampedArray.BYTES_PER_ELEMENT * (chunkInfo.size.x * chunkInfo.size.y * 4)));
 	let imgDataPos = 0;
 
-	for (let y = chunkInfo.start.y; y < chunkInfo.end.y; y++) {
-		for (let x = chunkInfo.start.x; x < chunkInfo.end.x; x++) {
+	for (let x = chunkInfo.start.x; x < chunkInfo.end.x; x++) {
+		for (let y = chunkInfo.start.y; y < chunkInfo.end.y; y++) {
 			let terrainHeight = heightMap.get(x, y);
 			let sun = Math.max(Vector.Dot(heightMap.getNormal(x, y), config.SunDirection), 0);
 

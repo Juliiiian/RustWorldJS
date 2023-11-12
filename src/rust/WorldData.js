@@ -1,9 +1,9 @@
 import protobuf from 'protobufjs/light.js';
-import { createCanvas, ImageData } from 'canvas';
+import { createCanvas, createImageData } from 'canvas';
 
 import TerrainMap from './TerrainMap.js';
 import TextMap from './TextMap.js';
-import { Vector, currentMapConfig, MapConfig } from './MapConfig.js';
+import { currentMapConfig, MapConfig } from './MapConfig.js';
 import { WorkerThreadPool } from '../workerManager.js';
 
 const TERRAIN_MAPS = {
@@ -356,8 +356,8 @@ export class WorldData {
 
 		await new Promise((resolve) => {
 			for (let i = 0; i < chunk_amount; i++) {
-				const x_chunk_offset = i % chunks_per_row;
-				const y_chunk_offset = Math.floor(i / chunks_per_row);
+				const x_chunk_offset = Math.floor(i / chunks_per_row);
+				const y_chunk_offset = i % chunks_per_row;
 
 				// get the start of the chunk from map size perspective
 				const x_chunk_start = x_chunk_offset * chunk_size;
@@ -398,7 +398,7 @@ export class WorldData {
 					(/** @type {Uint8ClampedArray} */ data) => {
 						const x_chunk_start = x_chunk_offset * chunk_size;
 						const y_chunk_start = y_chunk_offset * chunk_size;
-						ctx.putImageData(new ImageData(data, x_chunk_size, y_chunk_size), x_chunk_start, y_chunk_start);
+						ctx.putImageData(createImageData(data, y_chunk_size, x_chunk_size), y_chunk_start, x_chunk_start);
 
 						finished_workers++;
 						if (!thread_pool.Busy && finished_workers == chunk_amount) {
