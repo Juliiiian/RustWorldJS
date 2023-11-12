@@ -54,6 +54,13 @@ export class WorkerThread {
 		this._resolve = resolve;
 		this._worker.postMessage(worker_msg);
 	}
+
+	/**
+	 * Terminates this worker
+	 */
+	terminate() {
+		this._worker.terminate();
+	}
 }
 
 export class WorkerThreadPool {
@@ -121,5 +128,12 @@ export class WorkerThreadPool {
 				this._PumpQueue();
 			});
 		}
+	}
+
+	/**
+	 * Terminates the workers
+	 */
+	terminate() {
+		this._workers.forEach((_, i) => this._workers[i].terminate());
 	}
 }

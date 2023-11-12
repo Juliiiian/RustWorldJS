@@ -409,6 +409,9 @@ export class WorldData {
 				);
 			}
 		});
+
+		thread_pool.terminate();
+
 		console.log('Creating img');
 		return canvas.toDataURL();
 	}
