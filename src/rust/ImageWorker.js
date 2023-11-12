@@ -1,6 +1,19 @@
-/** @typedef {import('./TerrainMap.js').default} TerrainMap_type */
-/** @typedef {import('./MapConfig.js').Vector} Vector_type */
-/** @typedef {import('./MapConfig.js').MapConfig} MapConfig_type */
+import { MapConfig, Vector } from './MapConfig.js';
+import TerrainMap from './TerrainMap.js';
+
+/**
+ *
+ * @param {any} msg
+ */
+self.onmessage = (msg) => {
+	const { heightMap, splatMap, config, chunkInfo } = msg.data;
+	Object.setPrototypeOf(heightMap, TerrainMap.prototype);
+	Object.setPrototypeOf(splatMap, TerrainMap.prototype);
+
+	const chunk = render_chunk(heightMap, splatMap, config, chunkInfo);
+
+	self.postMessage(chunk, /** @type {any} */ (undefined), [chunk.buffer]);
+};
 
 /**
  * @typedef chunk_type
@@ -10,43 +23,10 @@
  * @property {{ x: number; y: number; }} size
  */
 
-/** @type {Vector_type} */
-let Vector;
-/** @type {MapConfig_type} */
-let MapConfig;
-/** @type {TerrainMap_type} */
-let TerrainMap;
-
-let importPromise = [
-	import('./TerrainMap.js').then((x) => {
-		TerrainMap = x.default;
-	}),
-	import('./MapConfig.js').then((x) => {
-		Vector = x.Vector;
-		MapConfig = x.MapConfig;
-	}),
-];
-
 /**
  *
- * @param {any} msg
- */
-self.onmessage = (msg) => {
-	Promise.all(importPromise).then(() => {
-		const { heightMap, splatMap, config, chunkInfo } = msg.data;
-		Object.setPrototypeOf(heightMap, TerrainMap.prototype);
-		Object.setPrototypeOf(splatMap, TerrainMap.prototype);
-
-		const chunk = render_chunk(heightMap, splatMap, config, chunkInfo);
-
-		self.postMessage(chunk, /** @type {any} */ (undefined), [chunk.buffer]);
-	});
-};
-
-/**
- *
- * @param {TerrainMap_type} heightMap
- * @param {TerrainMap_type} splatMap
+ * @param {TerrainMap} heightMap
+ * @param {TerrainMap} splatMap
  * @param {MapConfig} config
  * @param {chunk_type} chunkInfo
  * @returns
