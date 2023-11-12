@@ -1,9 +1,10 @@
 import protobuf from 'protobufjs/light.js';
-import { createCanvas } from 'canvas';
+import { createCanvas, ImageData } from 'canvas';
 
 import TerrainMap from './TerrainMap.js';
 import TextMap from './TextMap.js';
 import { Vector, currentMapConfig, MapConfig } from './MapConfig.js';
+import { WorkerThreadPool } from '../workerManager.js';
 
 const TERRAIN_MAPS = {
 	terrain: {
@@ -345,52 +346,70 @@ export class WorldData {
 
 		if (!heightMap || !biomeMap || !splatMap) return;
 
-		const setImageData = (image, i, r, g, b, a) => {
-			image.data[i + 0] = r;
-			image.data[i + 1] = g;
-			image.data[i + 2] = b;
-			image.data[i + 3] = a * 255;
-		};
+		const img_size = this.size;
+		const chunk_size = 512;
+		const chunks_per_row = Math.ceil(img_size / chunk_size);
+		const chunk_amount = chunks_per_row * chunks_per_row;
 
-		let imageData = ctx.createImageData(this.size, this.size);
+		const thread_pool = new WorkerThreadPool(6, new URL('./ImageWorker.cjs', import.meta.url));
+		let finished_workers = 0;
 
-		for (let x = 0; x < this.size; x++) {
-			for (let y = 0; y < this.size; y++) {
-				let i = (x * this.size + y) * 4;
+		await new Promise((resolve) => {
+			for (let i = 0; i < chunk_amount; i++) {
+				const x_chunk_offset = i % chunks_per_row;
+				const y_chunk_offset = Math.floor(i / chunks_per_row);
 
-				let terrainHeight = heightMap.get(x, y);
+				// get the start of the chunk from map size perspective
+				const x_chunk_start = x_chunk_offset * chunk_size;
+				const y_chunk_start = y_chunk_offset * chunk_size;
 
-				let sun = Math.max(Vector.Dot(heightMap.getNormal(x, y), config.SunDirection), 0);
+				// get the end of the chunk from img size perspective
+				// important chunks can be not fully so we need to look if it exceeds the img_size
+				const x_chunk_end = x_chunk_start + chunk_size > img_size ? img_size : x_chunk_start + chunk_size;
+				const y_chunk_end = y_chunk_start + chunk_size > img_size ? img_size : y_chunk_start + chunk_size;
 
-				let pixel = Vector.Lerp(config.StartColor, config.GravelColor, splatMap.getNormalized(x, y, 7) * config.GravelColor.m);
-				pixel = Vector.Lerp(pixel, config.PebbleColor, splatMap.getNormalized(x, y, 6) * config.PebbleColor.m);
-				pixel = Vector.Lerp(pixel, config.RockColor, splatMap.getNormalized(x, y, 3) * config.RockColor.m);
-				pixel = Vector.Lerp(pixel, config.DirtColor, splatMap.getNormalized(x, y, 0) * config.DirtColor.m);
-				pixel = Vector.Lerp(pixel, config.GrassColor, splatMap.getNormalized(x, y, 4) * config.GrassColor.m);
-				pixel = Vector.Lerp(pixel, config.ForestColor, splatMap.getNormalized(x, y, 5) * config.ForestColor.m);
-				pixel = Vector.Lerp(pixel, config.SandColor, splatMap.getNormalized(x, y, 2) * config.SandColor.m);
-				pixel = Vector.Lerp(pixel, config.SnowColor, splatMap.getNormalized(x, y, 1) * config.SnowColor.m);
+				const x_chunk_size = x_chunk_end - x_chunk_start;
+				const y_chunk_size = y_chunk_end - y_chunk_start;
 
-				if (terrainHeight < config.OceanWaterLevel) {
-					let waterDepth = config.OceanWaterLevel - terrainHeight;
-					pixel = Vector.Lerp(pixel, config.WaterColor, Math.max(0, Math.min(0.5 + waterDepth / 5.0, 1)));
-					pixel = Vector.Lerp(pixel, config.OffShoreColor, Math.max(0, Math.min(waterDepth / 50, 1)));
-					sun = config.SunPower;
-				}
+				thread_pool.enqueue(
+					{
+						heightMap,
+						splatMap,
+						config,
+						chunkInfo: {
+							offset: {
+								x: x_chunk_offset,
+								y: y_chunk_offset,
+							},
+							start: {
+								x: x_chunk_start,
+								y: y_chunk_start,
+							},
+							end: {
+								x: x_chunk_end,
+								y: y_chunk_end,
+							},
+							size: {
+								x: x_chunk_size,
+								y: y_chunk_size,
+							},
+						},
+					},
+					(/** @type {Uint8ClampedArray} */ data) => {
+						const x_chunk_start = x_chunk_offset * chunk_size;
+						const y_chunk_start = y_chunk_offset * chunk_size;
+						ctx.putImageData(new ImageData(data, x_chunk_size, y_chunk_size), x_chunk_start, y_chunk_start);
 
-				//sun
-				pixel = Vector.Addition(pixel, Vector.Multiply(pixel, (sun - config.SunPower) * config.SunPower));
-
-				//contrast ig?
-				pixel = Vector.Addition(Vector.Multiply(Vector.Substraction(pixel, config.Half), config.Contrast), config.Half);
-				//Brightness
-				pixel = Vector.Multiply(pixel, config.Brightness);
-
-				setImageData(imageData, i, pixel.x * 255, pixel.y * 255, pixel.z * 255, pixel.m);
+						finished_workers++;
+						if (!thread_pool.Busy && finished_workers == chunk_amount) {
+							console.log('Finished');
+							resolve(true);
+						}
+					}
+				);
 			}
-		}
-
-		ctx.putImageData(imageData, 0, 0);
+		});
+		console.log('Creating img');
 		return canvas.toDataURL();
 	}
 }
