@@ -5,7 +5,6 @@ import TerrainMap from './TerrainMap.js';
 import TextMap from './TextMap.js';
 import { currentMapConfig, MapConfig } from './MapConfig.js';
 import { WorkerThreadPool } from '../workerManager.js';
-import Worker from 'web-worker';
 
 const TERRAIN_MAPS = {
 	terrain: {
@@ -352,7 +351,7 @@ export class WorldData {
 		const chunks_per_row = Math.ceil(img_size / chunk_size);
 		const chunk_amount = chunks_per_row * chunks_per_row;
 
-		const thread_pool = new WorkerThreadPool(6, new URL('./ImageWorker.js', import.meta.url));
+		const thread_pool = new WorkerThreadPool(6, new URL('./ImageWorker.cjs', import.meta.url));
 		let finished_workers = 0;
 
 		await new Promise((resolve) => {
