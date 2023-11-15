@@ -65,28 +65,23 @@ export default class TerrainMap {
 	}
 
 	/**
-	 * Gets the data array with as the correct view + as sharedArrayBuffer
+	 * Gets the data from a channel with the correct view + as sharedArrayBuffer
 	 * @param {number} channel
 	 * @param {boolean} [asSharedBuffer]
+	 * @return {Uint8Array | Uint16Array | Uint32Array}
 	 */
-	getData(channel, asSharedBuffer) {
+	getData(channel = 0, asSharedBuffer) {
 		const channelData = this.getChannel(channel);
 		if (channelData == undefined) throw 'Channel does not exist!';
-		if (asSharedBuffer) return channelData;
-		switch (this.type) {
-			case 'int':
-				const bufferUnit32 = new Uint32Array(new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * channelData.length));
-				bufferUnit32.set(channelData);
-				return bufferUnit32;
-			case 'short':
-				const bufferUint16 = new Uint16Array(new SharedArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * channelData.length));
-				bufferUint16.set(channelData);
-				return bufferUint16;
-			case 'byte':
-				const bufferUint8 = new Uint8Array(new SharedArrayBuffer(Uint8Array.BYTES_PER_ELEMENT * channelData.length));
-				bufferUint8.set(channelData);
-				return bufferUint8;
-		}
+		if (!asSharedBuffer) return channelData;
+
+		//using the prototype constructor so we dont need to use new Unit8Array, Unit16Array ...
+		const prototypeChannelData = Object.getPrototypeOf(channelData);
+
+		const sharedBuffer = new SharedArrayBuffer(prototypeChannelData.BYTES_PER_ELEMENT * channelData.length);
+		const sharedArray = new prototypeChannelData.constructor(sharedBuffer);
+		sharedArray.set(channelData);
+		return sharedArray;
 	}
 
 	/**
@@ -157,7 +152,6 @@ export default class TerrainMap {
 	}
 
 	/**
-	 *
 	 * @param {number} x
 	 * @param {number} y
 	 * @returns {Vector}
@@ -206,6 +200,5 @@ export default class TerrainMap {
 			case 'byte':
 				return 1;
 		}
-		return 1;
 	}
 }
