@@ -337,12 +337,51 @@ export class WorldData {
 	async createImage(config) {
 		if (!config) config = currentMapConfig;
 
+		const startImageCreation = new Date().getTime();
+
 		const canvas = createCanvas(this.size, this.size);
 		const ctx = canvas.getContext('2d');
 
 		let heightMap = this.getMapAsTerrain('height');
 		let biomeMap = this.getMapAsTerrain('biome');
 		let splatMap = this.getMapAsTerrain('splat');
+
+		/** @type {Array<Uint8Array | Uint16Array | Uint32Array>} */
+		let heightMapBuffer = [];
+		/** @type {Array<Uint8Array | Uint16Array | Uint32Array>} */
+		let splatMapBuffer = [];
+
+		//check if SharedArrayBuffer is available
+		const SharedArrayBufferAvailable = typeof SharedArrayBuffer !== 'undefined';
+
+		//debug
+		if (SharedArrayBufferAvailable) {
+			console.log('SharedArrayBuffers are supported!');
+		} else {
+			console.error('SharedArrayBuffers are not supported in this environment.');
+		}
+
+		heightMapBuffer.push(heightMap.getData(0, SharedArrayBufferAvailable));
+
+		for (let i = 0; i < splatMap.channels; i++) {
+			splatMapBuffer.push(splatMap.getData(i, SharedArrayBufferAvailable));
+		}
+
+		const heightMapObj = {
+			type: heightMap.type,
+			res: heightMap.res,
+			channels: heightMap.channels,
+			worldSize: heightMap.worldSize,
+			data: heightMapBuffer,
+		};
+
+		const splatMapObj = {
+			type: splatMap.type,
+			res: splatMap.res,
+			channels: splatMap.channels,
+			worldSize: splatMap.worldSize,
+			data: splatMapBuffer,
+		};
 
 		if (!heightMap || !biomeMap || !splatMap) return;
 
@@ -373,8 +412,8 @@ export class WorldData {
 
 				thread_pool.enqueue(
 					{
-						heightMap,
-						splatMap,
+						heightMapObj,
+						splatMapObj,
 						config,
 						chunkInfo: {
 							offset: {
@@ -412,7 +451,9 @@ export class WorldData {
 
 		thread_pool.terminate();
 
-		console.log('Creating img');
-		return canvas.toDataURL();
+		const image = canvas.toDataURL();
+
+		console.log(`Returning img ${(new Date().getTime() - startImageCreation) / 1000} sec`);
+		return image;
 	}
 }

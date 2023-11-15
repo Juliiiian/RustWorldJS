@@ -1,3 +1,20 @@
+/**
+ * @typedef {Object} terrainMapMsg
+ * @property {("int" | "short" | "byte")} type - The type of the data ("int", "short", or "byte").
+ * @property {number} res - The resolution of the data.
+ * @property {number} channels - The number of channels.
+ * @property {number} worldSize - The size of the world.
+ * @property {Array<Uint8Array | Uint16Array | Uint32Array>} data - An array of typed arrays (Uint8Array, Uint16Array, Uint32Array).
+ */
+
+/**
+ * @typedef {Object} msgType
+ * @property {terrainMapMsg} heightMapObj
+ * @property {terrainMapMsg} splatMapObj
+ * @property {any} config
+ * @property {any} chunkInfo
+ */
+
 /** @type {typeof import('./TerrainMap').default} */
 let TerrainMap;
 /** @type {typeof import('./MapConfig').Vector} */
@@ -11,14 +28,13 @@ let importPromise = [
 	}),
 ];
 
-/**
- * @param {any} msg
- */
+/** @param {any} msg */
 self.onmessage = (msg) => {
 	Promise.all(importPromise).then(() => {
-		const { heightMap, splatMap, config, chunkInfo } = msg.data;
-		Object.setPrototypeOf(heightMap, /** @type {typeof TerrainMap} */ TerrainMap.prototype);
-		Object.setPrototypeOf(splatMap, TerrainMap.prototype);
+		/** @type {msgType} */
+		const { heightMapObj, splatMapObj, config, chunkInfo } = msg.data;
+		const heightMap = new TerrainMap(heightMapObj.data, heightMapObj.channels, heightMapObj.type, heightMapObj.worldSize);
+		const splatMap = new TerrainMap(splatMapObj.data, splatMapObj.channels, splatMapObj.type, splatMapObj.worldSize);
 
 		const chunk = render_chunk(heightMap, splatMap, config, chunkInfo);
 

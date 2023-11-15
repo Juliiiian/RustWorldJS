@@ -14,12 +14,17 @@ export default class TerrainMap {
 
 	/**
 	 *
-	 * @param {Uint8Array} data
+	 * @param {Uint8Array | Array<Uint8Array | Uint16Array | Uint32Array>} data
 	 * @param {number} channels
 	 * @param {"int" | "short" | "byte"} type
 	 * @param {number} worldSize
 	 */
 	constructor(data, channels, type, worldSize) {
+		if (Array.isArray(data)) {
+			this.setData(data, channels, type, Math.sqrt(data[0].length), worldSize);
+			return;
+		}
+
 		this.channels = channels;
 		this.worldSize = worldSize;
 		let offset = data.byteOffset;
@@ -57,6 +62,47 @@ export default class TerrainMap {
 		}
 
 		this.type = type;
+	}
+
+	/**
+	 * Gets the data array with as the correct view + as sharedArrayBuffer
+	 * @param {number} channel
+	 * @param {boolean} [asSharedBuffer]
+	 */
+	getData(channel, asSharedBuffer) {
+		const channelData = this.getChannel(channel);
+		if (channelData == undefined) throw 'Channel does not exist!';
+		if (asSharedBuffer) return channelData;
+		switch (this.type) {
+			case 'int':
+				const bufferUnit32 = new Uint32Array(new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * channelData.length));
+				bufferUnit32.set(channelData);
+				return bufferUnit32;
+			case 'short':
+				const bufferUint16 = new Uint16Array(new SharedArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * channelData.length));
+				bufferUint16.set(channelData);
+				return bufferUint16;
+			case 'byte':
+				const bufferUint8 = new Uint8Array(new SharedArrayBuffer(Uint8Array.BYTES_PER_ELEMENT * channelData.length));
+				bufferUint8.set(channelData);
+				return bufferUint8;
+		}
+	}
+
+	/**
+	 *
+	 * @param {Array<Uint8Array | Uint16Array | Uint32Array>} data
+	 * @param {number} channels
+	 * @param {"int" | "short" | "byte"} type
+	 * @param {number} res
+	 * @param {number} worldSize
+	 */
+	setData(data, channels, type, res, worldSize) {
+		this.type = type;
+		this.res = res;
+		this.channels = channels;
+		this.worldSize = worldSize;
+		this.data = data;
 	}
 
 	/**
