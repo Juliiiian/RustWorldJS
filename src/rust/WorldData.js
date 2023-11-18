@@ -332,9 +332,10 @@ export class WorldData {
 
 	/**
 	 *
-	 * @param {MapConfig} [config]
+	 * @param {MapConfig | undefined} config
+	 * @param {{height?: TerrainMap, biom?: TerrainMap, splat?: TerrainMap}} terrainMaps
 	 */
-	async createImage(config) {
+	async createImage(config, terrainMaps) {
 		if (!config) config = currentMapConfig;
 
 		const startImageCreation = new Date().getTime();
@@ -342,9 +343,11 @@ export class WorldData {
 		const canvas = createCanvas(this.size, this.size);
 		const ctx = canvas.getContext('2d');
 
-		let heightMap = this.getMapAsTerrain('height');
-		let biomeMap = this.getMapAsTerrain('biome');
-		let splatMap = this.getMapAsTerrain('splat');
+		let heightMap = terrainMaps.height ? terrainMaps.height : this.getMapAsTerrain('height');
+		let splatMap = terrainMaps.splat ? terrainMaps.splat : this.getMapAsTerrain('splat');
+		// let biomeMap = terrainMaps.biom ? terrainMaps.biom : this.getMapAsTerrain('biome');
+
+		if (!heightMap || !splatMap) return;
 
 		/** @type {Array<Uint8Array | Uint16Array | Uint32Array>} */
 		let heightMapBuffer = [];
@@ -382,8 +385,6 @@ export class WorldData {
 			worldSize: splatMap.worldSize,
 			data: splatMapBuffer,
 		};
-
-		if (!heightMap || !biomeMap || !splatMap) return;
 
 		const img_size = this.size;
 		const chunk_size = 512;
