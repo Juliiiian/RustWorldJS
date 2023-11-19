@@ -454,7 +454,6 @@ export class WorldData {
 						}
 						finished_workers++;
 						if (!thread_pool.Busy && finished_workers == chunk_amount) {
-							console.log('Finished');
 							resolve(true);
 						}
 					}
@@ -478,14 +477,16 @@ export class WorldData {
 	 *
 	 * @param {Float32Array[]} chunks
 	 * @param {number} chunkSize
+	 * @param {number} [chunkFix]
 	 */
-	async assambleImage(chunks, chunkSize) {
+	async assembleImage(chunks, chunkSize, chunkFix) {
+		if (!chunkFix) chunkFix = 0;
 		const startTimer = new Date().getTime();
 
 		const imgSize = this.size;
 
 		const canvas = createCanvas(imgSize, imgSize);
-		const ctx = canvas.getContext('2d', { alpha: false });
+		const ctx = canvas.getContext('2d');
 
 		const chunk_size = chunkSize;
 		const chunks_per_row = Math.ceil(imgSize / chunk_size);
@@ -499,18 +500,25 @@ export class WorldData {
 
 			// get the end of the chunk from img size perspective
 			// important chunks can be not fully so we need to look if it exceeds the img_size
-			const x_chunk_end = x_chunk_start + chunk_size > imgSize ? imgSize : x_chunk_start + chunk_size;
-			const y_chunk_end = y_chunk_start + chunk_size > imgSize ? imgSize : y_chunk_start + chunk_size;
+			const x_chunk_end = x_chunk_start + chunk_size > imgSize ? imgSize : x_chunk_start + chunk_size + chunkFix;
+			const y_chunk_end = y_chunk_start + chunk_size > imgSize ? imgSize : y_chunk_start + chunk_size + chunkFix;
 
 			const x_chunk_size = x_chunk_end - x_chunk_start;
 			const y_chunk_size = y_chunk_end - y_chunk_start;
 
-			const convertedChunkData = new Uint8ClampedArray(new ArrayBuffer(Uint8ClampedArray.BYTES_PER_ELEMENT * chunks[i].length));
+			const convertedChunkData = new Uint8ClampedArray(
+				new ArrayBuffer(Uint8ClampedArray.BYTES_PER_ELEMENT * (x_chunk_size * y_chunk_size * 4))
+			);
+			let convertedChunkIndex = 0;
 
-			for (let j = 0; j < chunks[i].length; j++) {
-				convertedChunkData[j] = chunks[i][j] * 255;
+			for (let j = 0; j < chunks[i].length; j = j + 3) {
+				convertedChunkData[convertedChunkIndex++] = chunks[i][j] * 255;
+				convertedChunkData[convertedChunkIndex++] = chunks[i][j + 1] * 255;
+				convertedChunkData[convertedChunkIndex++] = chunks[i][j + 2] * 255;
+				convertedChunkData[convertedChunkIndex++] = 255;
 			}
 
+			console.log(convertedChunkData);
 			const imgData = createImageData(convertedChunkData, y_chunk_size, x_chunk_size);
 			ctx.putImageData(imgData, y_chunk_start, x_chunk_start);
 		}
