@@ -340,8 +340,6 @@ export class WorldData {
 		if (!config) config = currentMapConfig;
 		if (!options) options = { output: 'fullImg', chunkFix: 0, chunkSize: 512 }; //set default or maybe throw err?
 
-		const startImageCreation = new Date().getTime();
-
 		let heightMap = terrainMaps.height ? terrainMaps.height : this.getMapAsTerrain('height');
 		let splatMap = terrainMaps.splat ? terrainMaps.splat : this.getMapAsTerrain('splat');
 		// let biomeMap = terrainMaps.biom ? terrainMaps.biom : this.getMapAsTerrain('biome');
@@ -398,6 +396,9 @@ export class WorldData {
 		let finalChunks = [];
 
 		await new Promise((resolve) => {
+			//at the start of the function is somehow not enough otherwise error on chunk end calc
+			if (!options) options = { output: 'fullImg', chunkFix: 0, chunkSize: 512 };
+
 			for (let i = 0; i < chunk_amount; i++) {
 				const x_chunk_offset = Math.floor(i / chunks_per_row);
 				const y_chunk_offset = i % chunks_per_row;
@@ -440,7 +441,7 @@ export class WorldData {
 						useFloatColors: options.output == 'chunkF32' ? true : false,
 					},
 					(/** @type {Uint8ClampedArray | Float32Array} */ data) => {
-						if (options.output == 'chunkF32') {
+						if (options?.output == 'chunkF32') {
 							finalChunks[i] = /** @type {Float32Array} */ (data);
 						} else {
 							//default is full img
@@ -465,10 +466,12 @@ export class WorldData {
 
 		if (options.output == 'chunkF32') {
 			return finalChunks;
-		} else {
+		} else if (options.output == 'fullImg') {
+			// @ts-ignore since it has been set when its fullImg
 			const image = canvas.toDataURL();
 			return image;
 		}
+		return;
 	}
 
 	/**
