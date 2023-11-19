@@ -518,7 +518,6 @@ export class WorldData {
 				convertedChunkData[convertedChunkIndex++] = 255;
 			}
 
-			console.log(convertedChunkData);
 			const imgData = createImageData(convertedChunkData, y_chunk_size, x_chunk_size);
 			ctx.putImageData(imgData, y_chunk_start, x_chunk_start);
 		}

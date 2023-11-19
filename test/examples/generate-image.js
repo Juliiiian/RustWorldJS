@@ -14,12 +14,12 @@ export default async function generateImage() {
 		const splatMap = world.getMapAsTerrain('splat');
 
 		//normal img
-		// const image = /** @type {string} */ (
-		// 	await world.createImage(undefined, { height: heightMap, splat: splatMap }, { output: 'fullImg', chunkFix: 0, chunkSize: 512 })
-		// );
-		// if (!image) throw 'image';
-		// const buffer = Buffer.from(image.split(',')[1], 'base64');
-		// await fs.writeFile(__dirname + '/test-maps/image.png', buffer);
+		const image = /** @type {string} */ (
+			await world.createImage(undefined, { height: heightMap, splat: splatMap }, { output: 'fullImg', chunkFix: 0, chunkSize: 512 })
+		);
+		if (!image) throw 'image';
+		const buffer = Buffer.from(image.split(',')[1], 'base64');
+		await fs.writeFile(__dirname + '/test-maps/image.png', buffer);
 
 		//img from F32 Chunks
 		const imageChunks = await world.createImage(
