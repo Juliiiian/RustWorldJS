@@ -13,6 +13,7 @@
  * @property {terrainMapMsg} splatMapObj
  * @property {any} config
  * @property {any} chunkInfo
+ * @property {boolean} useFloatColors
  */
 
 /** @type {typeof import('./TerrainMap').default} */
@@ -32,11 +33,11 @@ let importPromise = [
 self.onmessage = (msg) => {
 	Promise.all(importPromise).then(() => {
 		/** @type {msgType} */
-		const { heightMapObj, splatMapObj, config, chunkInfo } = msg.data;
+		const { heightMapObj, splatMapObj, config, chunkInfo, useFloatColors } = msg.data;
 		const heightMap = new TerrainMap(heightMapObj.data, heightMapObj.channels, heightMapObj.type, heightMapObj.worldSize);
 		const splatMap = new TerrainMap(splatMapObj.data, splatMapObj.channels, splatMapObj.type, splatMapObj.worldSize);
 
-		const chunk = render_chunk(heightMap, splatMap, config, chunkInfo);
+		const chunk = render_chunk(heightMap, splatMap, config, chunkInfo, useFloatColors);
 
 		self.postMessage(chunk, /** @type {any} */ (undefined), [chunk.buffer]);
 	});
@@ -56,10 +57,24 @@ self.onmessage = (msg) => {
  * @param {import('./TerrainMap').default} splatMap
  * @param {import('./MapConfig').MapConfig} config
  * @param {chunk_type} chunkInfo
+ * @param {boolean} useFloatColors
  * @returns
  */
-const render_chunk = (heightMap, splatMap, config, chunkInfo) => {
-	const imgData = new Uint8ClampedArray(new ArrayBuffer(Uint8ClampedArray.BYTES_PER_ELEMENT * (chunkInfo.size.x * chunkInfo.size.y * 4)));
+const render_chunk = (heightMap, splatMap, config, chunkInfo, useFloatColors) => {
+	/** @type {Float32Array | Uint8ClampedArray} */
+	let imgData;
+	/** @type {number} */
+	let multiplyColor; //for the en
+
+	//when using floats we just need no multiplication so * 1
+	if (useFloatColors) {
+		multiplyColor = 1;
+		imgData = new Float32Array(new ArrayBuffer(Float32Array.BYTES_PER_ELEMENT * (chunkInfo.size.x * chunkInfo.size.y * 3)));
+	} else {
+		multiplyColor = 255;
+		imgData = new Uint8ClampedArray(new ArrayBuffer(Uint8ClampedArray.BYTES_PER_ELEMENT * (chunkInfo.size.x * chunkInfo.size.y * 4)));
+	}
+
 	let imgDataPos = 0;
 
 	for (let x = chunkInfo.start.x; x < chunkInfo.end.x; x++) {
@@ -91,10 +106,10 @@ const render_chunk = (heightMap, splatMap, config, chunkInfo) => {
 			//Brightness
 			pixel = Vector.Multiply(pixel, config.Brightness);
 
-			imgData[imgDataPos++] = pixel.x * 255;
-			imgData[imgDataPos++] = pixel.y * 255;
-			imgData[imgDataPos++] = pixel.z * 255;
-			imgData[imgDataPos++] = pixel.m * 255;
+			imgData[imgDataPos++] = pixel.x * multiplyColor;
+			imgData[imgDataPos++] = pixel.y * multiplyColor;
+			imgData[imgDataPos++] = pixel.z * multiplyColor;
+			if (multiplyColor == 255) imgData[imgDataPos++] = pixel.m * multiplyColor;
 		}
 	}
 	return imgData;

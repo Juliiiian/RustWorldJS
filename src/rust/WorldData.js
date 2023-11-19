@@ -331,17 +331,16 @@ export class WorldData {
 	}
 
 	/**
-	 *
-	 * @param {MapConfig | undefined} config
+	 * When options are fullImg it will return a string of the full img, if its chunkF32 you get a array of F32 Array buffers
+	 * @param {MapConfig | undefined} config color config
 	 * @param {{height?: TerrainMap, biom?: TerrainMap, splat?: TerrainMap}} terrainMaps
+	 * @param {{output: 'fullImg' | 'chunkF32', chunkFix: number, chunkSize: number}} [options] default is fullImg
 	 */
-	async createImage(config, terrainMaps) {
+	async createImage(config, terrainMaps, options) {
 		if (!config) config = currentMapConfig;
+		if (!options) options = { output: 'fullImg', chunkFix: 0, chunkSize: 512 }; //set default or maybe throw err?
 
 		const startImageCreation = new Date().getTime();
-
-		const canvas = createCanvas(this.size, this.size);
-		const ctx = canvas.getContext('2d');
 
 		let heightMap = terrainMaps.height ? terrainMaps.height : this.getMapAsTerrain('height');
 		let splatMap = terrainMaps.splat ? terrainMaps.splat : this.getMapAsTerrain('splat');
@@ -356,13 +355,6 @@ export class WorldData {
 
 		//check if SharedArrayBuffer is available
 		const SharedArrayBufferAvailable = typeof SharedArrayBuffer !== 'undefined';
-
-		//debug
-		if (SharedArrayBufferAvailable) {
-			console.log('SharedArrayBuffers are supported!');
-		} else {
-			console.error('SharedArrayBuffers are not supported in this environment.');
-		}
 
 		heightMapBuffer.push(heightMap.getData(0, SharedArrayBufferAvailable));
 
@@ -387,12 +379,23 @@ export class WorldData {
 		};
 
 		const img_size = this.size;
-		const chunk_size = 512;
+		const chunk_size = options.chunkSize;
 		const chunks_per_row = Math.ceil(img_size / chunk_size);
 		const chunk_amount = chunks_per_row * chunks_per_row;
 
 		const thread_pool = new WorkerThreadPool(6, new URL('./ImageWorker.cjs', import.meta.url));
 		let finished_workers = 0;
+
+		let canvas;
+		let ctx;
+
+		if (options.output == 'fullImg') {
+			canvas = createCanvas(this.size, this.size);
+			ctx = canvas.getContext('2d');
+		}
+
+		/** @type {Float32Array[]} */
+		let finalChunks = [];
 
 		await new Promise((resolve) => {
 			for (let i = 0; i < chunk_amount; i++) {
@@ -405,8 +408,8 @@ export class WorldData {
 
 				// get the end of the chunk from img size perspective
 				// important chunks can be not fully so we need to look if it exceeds the img_size
-				const x_chunk_end = x_chunk_start + chunk_size > img_size ? img_size : x_chunk_start + chunk_size;
-				const y_chunk_end = y_chunk_start + chunk_size > img_size ? img_size : y_chunk_start + chunk_size;
+				const x_chunk_end = x_chunk_start + chunk_size > img_size ? img_size : x_chunk_start + chunk_size + options.chunkFix;
+				const y_chunk_end = y_chunk_start + chunk_size > img_size ? img_size : y_chunk_start + chunk_size + options.chunkFix;
 
 				const x_chunk_size = x_chunk_end - x_chunk_start;
 				const y_chunk_size = y_chunk_end - y_chunk_start;
@@ -434,12 +437,21 @@ export class WorldData {
 								y: y_chunk_size,
 							},
 						},
+						useFloatColors: options.output == 'chunkF32' ? true : false,
 					},
-					(/** @type {Uint8ClampedArray} */ data) => {
-						const x_chunk_start = x_chunk_offset * chunk_size;
-						const y_chunk_start = y_chunk_offset * chunk_size;
-						ctx.putImageData(createImageData(data, y_chunk_size, x_chunk_size), y_chunk_start, x_chunk_start);
-
+					(/** @type {Uint8ClampedArray | Float32Array} */ data) => {
+						if (options.output == 'chunkF32') {
+							finalChunks[i] = /** @type {Float32Array} */ (data);
+						} else {
+							//default is full img
+							const x_chunk_start = x_chunk_offset * chunk_size;
+							const y_chunk_start = y_chunk_offset * chunk_size;
+							ctx.putImageData(
+								createImageData(/** @type {Uint8ClampedArray} */ (data), y_chunk_size, x_chunk_size),
+								y_chunk_start,
+								x_chunk_start
+							);
+						}
 						finished_workers++;
 						if (!thread_pool.Busy && finished_workers == chunk_amount) {
 							console.log('Finished');
@@ -452,9 +464,58 @@ export class WorldData {
 
 		thread_pool.terminate();
 
-		const image = canvas.toDataURL();
+		if (options.output == 'chunkF32') {
+			console.log(`Returning F32 chunks in ${(new Date().getTime() - startImageCreation) / 1000} sec`);
+			return finalChunks;
+		} else {
+			console.log(`Returning img in ${(new Date().getTime() - startImageCreation) / 1000} sec`);
+			const image = canvas.toDataURL();
+			return image;
+		}
+	}
 
-		console.log(`Returning img ${(new Date().getTime() - startImageCreation) / 1000} sec`);
+	/**
+	 *
+	 * @param {Float32Array[]} chunks
+	 * @param {number} chunkSize
+	 */
+	async assambleImage(chunks, chunkSize) {
+		const startTimer = new Date().getTime();
+
+		const imgSize = this.size;
+
+		const canvas = createCanvas(imgSize, imgSize);
+		const ctx = canvas.getContext('2d', { alpha: false });
+
+		const chunk_size = chunkSize;
+		const chunks_per_row = Math.ceil(imgSize / chunk_size);
+
+		for (let i = 0; i < chunks.length; i++) {
+			const x_chunk_offset = Math.floor(i / chunks_per_row);
+			const y_chunk_offset = i % chunks_per_row;
+
+			const x_chunk_start = x_chunk_offset * chunk_size;
+			const y_chunk_start = y_chunk_offset * chunk_size;
+
+			// get the end of the chunk from img size perspective
+			// important chunks can be not fully so we need to look if it exceeds the img_size
+			const x_chunk_end = x_chunk_start + chunk_size > imgSize ? imgSize : x_chunk_start + chunk_size;
+			const y_chunk_end = y_chunk_start + chunk_size > imgSize ? imgSize : y_chunk_start + chunk_size;
+
+			const x_chunk_size = x_chunk_end - x_chunk_start;
+			const y_chunk_size = y_chunk_end - y_chunk_start;
+
+			const convertedChunkData = new Uint8ClampedArray(new ArrayBuffer(Uint8ClampedArray.BYTES_PER_ELEMENT * chunks[i].length));
+
+			for (let j = 0; j < chunks[i].length; j++) {
+				convertedChunkData[j] = chunks[i][j] * 255;
+			}
+
+			const imgData = createImageData(convertedChunkData, y_chunk_size, x_chunk_size);
+			ctx.putImageData(imgData, y_chunk_start, x_chunk_start);
+		}
+		const image = canvas.toDataURL();
+		console.log(`Rendered Img in ${(new Date().getTime() - startTimer) / 1000} sec`);
 		return image;
 	}
 }
