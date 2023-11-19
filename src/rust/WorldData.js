@@ -464,10 +464,8 @@ export class WorldData {
 		thread_pool.terminate();
 
 		if (options.output == 'chunkF32') {
-			console.log(`Returning F32 chunks in ${(new Date().getTime() - startImageCreation) / 1000} sec`);
 			return finalChunks;
 		} else {
-			console.log(`Returning img in ${(new Date().getTime() - startImageCreation) / 1000} sec`);
 			const image = canvas.toDataURL();
 			return image;
 		}
@@ -522,7 +520,6 @@ export class WorldData {
 			ctx.putImageData(imgData, y_chunk_start, x_chunk_start);
 		}
 		const image = canvas.toDataURL();
-		console.log(`Rendered Img in ${(new Date().getTime() - startTimer) / 1000} sec`);
 		return image;
 	}
 }
