@@ -1,3 +1,6 @@
+import { MapConfig, Vector } from './MapConfig.js';
+import TerrainMap from './TerrainMap.js';
+
 /**
  * @typedef {Object} terrainMapMsg
  * @property {("int" | "short" | "byte")} type - The type of the data ("int", "short", or "byte").
@@ -16,31 +19,16 @@
  * @property {boolean} useFloatColors
  */
 
-/** @type {typeof import('./TerrainMap').default} */
-let TerrainMap;
-/** @type {typeof import('./MapConfig').Vector} */
-let Vector;
-let importPromise = [
-	import('./TerrainMap.js').then((module) => {
-		TerrainMap = module.default;
-	}),
-	import('./MapConfig.js').then((module) => {
-		Vector = module.Vector;
-	}),
-];
-
 /** @param {any} msg */
 self.onmessage = (msg) => {
-	Promise.all(importPromise).then(() => {
-		/** @type {msgType} */
-		const { heightMapObj, splatMapObj, config, chunkInfo, useFloatColors } = msg.data;
-		const heightMap = new TerrainMap(heightMapObj.data, heightMapObj.channels, heightMapObj.type, heightMapObj.worldSize);
-		const splatMap = new TerrainMap(splatMapObj.data, splatMapObj.channels, splatMapObj.type, splatMapObj.worldSize);
+	/** @type {msgType} */
+	const { heightMapObj, splatMapObj, config, chunkInfo, useFloatColors } = msg.data;
+	const heightMap = new TerrainMap(heightMapObj.data, heightMapObj.channels, heightMapObj.type, heightMapObj.worldSize);
+	const splatMap = new TerrainMap(splatMapObj.data, splatMapObj.channels, splatMapObj.type, splatMapObj.worldSize);
 
-		const chunk = render_chunk(heightMap, splatMap, config, chunkInfo, useFloatColors);
+	const chunk = render_chunk(heightMap, splatMap, config, chunkInfo, useFloatColors);
 
-		self.postMessage(chunk, /** @type {any} */ (undefined), [chunk.buffer]);
-	});
+	self.postMessage(chunk, /** @type {any} */ (undefined), [chunk.buffer]);
 };
 
 /**
@@ -53,9 +41,9 @@ self.onmessage = (msg) => {
 
 /**
  *
- * @param {import('./TerrainMap').default} heightMap
- * @param {import('./TerrainMap').default} splatMap
- * @param {import('./MapConfig').MapConfig} config
+ * @param {TerrainMap} heightMap
+ * @param {TerrainMap} splatMap
+ * @param {MapConfig} config
  * @param {chunk_type} chunkInfo
  * @param {boolean} useFloatColors
  * @returns

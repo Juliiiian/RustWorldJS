@@ -19,7 +19,7 @@ export class WorkerThread {
 	 * @param {number} id
 	 */
 	constructor(scriptURL, id) {
-		this._worker = new Worker(scriptURL); //, { type: 'module' });
+		this._worker = new Worker(scriptURL, { type: 'module' });
 		//on the actuall onmessage event from the worker we use our wrapper
 
 		this._worker.onmessage = (/** @type {any} */ msg) => {
