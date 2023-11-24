@@ -334,11 +334,11 @@ export class WorldData {
 	 * When options are fullImg it will return a string of the full img, if its chunkF32 you get a array of F32 Array buffers
 	 * @param {MapConfig | undefined} config color config
 	 * @param {{height?: TerrainMap, biom?: TerrainMap, splat?: TerrainMap}} terrainMaps
-	 * @param {{output: 'fullImg' | 'chunkF32', chunkFix: number, chunkSize: number}} [options] default is fullImg
+	 * @param {{output: 'fullImg' | 'chunkF32', chunkFix: number, chunkSize: number, worker: string | boolean}} [options] default is fullImg
 	 */
 	async createImage(config, terrainMaps, options) {
 		if (!config) config = currentMapConfig;
-		if (!options) options = { output: 'fullImg', chunkFix: 0, chunkSize: 512 }; //set default or maybe throw err?
+		if (!options) options = { output: 'fullImg', chunkFix: 0, chunkSize: 512, worker: false }; //set default or maybe throw err?
 
 		let heightMap = terrainMaps.height ? terrainMaps.height : this.getMapAsTerrain('height');
 		let splatMap = terrainMaps.splat ? terrainMaps.splat : this.getMapAsTerrain('splat');
@@ -381,7 +381,10 @@ export class WorldData {
 		const chunks_per_row = Math.ceil(img_size / chunk_size);
 		const chunk_amount = chunks_per_row * chunks_per_row;
 
-		const thread_pool = new WorkerThreadPool(6, new URL('./ImageWorker.js', import.meta.url));
+		const thread_pool = new WorkerThreadPool(
+			6,
+			typeof options.worker == 'string' ? options.worker : new URL('./ImageWorker.js', import.meta.url)
+		);
 		let finished_workers = 0;
 
 		let canvas;
