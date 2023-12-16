@@ -184,14 +184,18 @@ export class WorldData {
 	 * @param {number | undefined} [length]
 	 */
 	static decode = (reader, length) => {
-		/** @type {*} */
-		const decoded = WorldData_pb.decode(reader, length);
-		const newClass = new WorldData(0);
-		newClass.size = decoded.size;
-		newClass.maps = decoded.maps;
-		newClass.prefabs = decoded.prefabs;
-		newClass.paths = decoded.paths;
-		return newClass;
+		try {
+			/** @type {*} */
+			const decoded = WorldData_pb.decode(reader, length);
+			const newClass = new WorldData(0);
+			newClass.size = decoded.size;
+			newClass.maps = decoded.maps;
+			newClass.prefabs = decoded.prefabs;
+			newClass.paths = decoded.paths;
+			return newClass;
+		} catch (error) {
+			throw 'Error when decoding map';
+		}
 	};
 
 	/**
