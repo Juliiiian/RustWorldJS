@@ -20,6 +20,7 @@ export default class TerrainMap {
 	 * @param {number} worldSize
 	 */
 	constructor(data, channels, type, worldSize) {
+		//needed when creating the class in a worker from the data
 		if (Array.isArray(data)) {
 			this.setData(data, channels, type, Math.sqrt(data[0].length), worldSize);
 			return;
@@ -117,7 +118,7 @@ export default class TerrainMap {
 		for (let i = 0; i < h2; i++) {
 			for (let j = 0; j < w2; j++) {
 				px = Math.floor(j * x_ratio);
-				py = Math.floor(i * y_ratio);
+				py = Math.floor((h2 - i - 1) * y_ratio); // flip vertically
 				temp[i * w2 + j] = pixels[py * w1 + px];
 			}
 		}
