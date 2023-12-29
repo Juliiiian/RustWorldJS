@@ -3,9 +3,9 @@ import LZ4Reader from './LZ4Reader.js';
 import TerrainMap from './rust/TerrainMap.js';
 import TextMap from './rust/TextMap.js';
 import LZ4Writer from './LZ4Writer.js';
-import { MapConfig, Vector } from './rust/MapConfig.js';
+import { MapConfig, Vector, oldMapConfig, currentMapConfig } from './rust/MapConfig.js';
 
-export { WorldData, TerrainMap, TextMap, LZ4Reader, MapConfig, Vector };
+export { WorldData, TerrainMap, TextMap, LZ4Reader, MapConfig, Vector, oldMapConfig, currentMapConfig };
 
 /**
  *
