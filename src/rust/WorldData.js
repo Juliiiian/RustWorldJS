@@ -194,6 +194,7 @@ export class WorldData {
 			newClass.paths = decoded.paths;
 			return newClass;
 		} catch (error) {
+			console.error(error);
 			throw 'Error when decoding map';
 		}
 	};
